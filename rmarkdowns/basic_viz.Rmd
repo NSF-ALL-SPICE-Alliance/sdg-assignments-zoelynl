@@ -131,6 +131,13 @@ Cool! It seems that the darkest blue points (countries with the lowest SDG 5 sco
 #### <span style="color: red;">Challenge 1</span>
 Create a scatterplot using two different SDG scores. Then, color the points by using a third SDG score. In a couple of sentences, describe what you see.
 
+```{r}
+ggplot(data = sdr_data, aes(x= goal_11_score, y = goal_12_score, color = goal_13_score)) +
+  geom_point()
+```
+Interpretation: The darkest blue points (countries with the lowest SDG 13 scores) tend to have higher SDG 11 scores--although interesting to note that there are not many countries with low SDG 13 scores. The lightest blue points (countries with the highest SDG 13 scores) tend to have higher SDG 12 scores. However, this same group (light blue points/high SDG 13 scores) is fairly widely distributed across the SDG 11 scores. 
+
+
 ### Bar Chart
 
 When should we use a **bar chart**?
@@ -190,6 +197,17 @@ As we can see in the Oceania region, most Countries do not have the necessary da
 #### <span style="color: red;">Challenge 2</span>
 Create a new bar chart with countries only from the MENA region. 
 
+```{r}
+mena_sdr_data <- sdr_data %>% 
+  filter(regions_used_for_the_sdr == "MENA")
+```
+
+```{r}
+ggplot(mena_sdr_data, aes(x= goal_5_score, y = country)) +
+  geom_bar(stat = "identity") 
+```
+
+
 ### Histogram
 
 When do we use a **histogram**?
@@ -224,3 +242,9 @@ Countries that fall in the higher end of the Goal 4 spectrum belong to the OECD 
 
 #### <span style="color: red;">Challenge 3</span>
 Make a histogram for a different SDG score. Then, fill by region. In a couple of sentences, describe any interesting trends or what you notice from your new histogram.
+
+```{r}
+ggplot(sdr_data, aes(x = goal_13_score, fill=regions_used_for_the_sdr)) + 
+  geom_histogram(bins=33, color="black")
+```
+Interpretation: SDG 13 is to "limit and adapt to climate change", so this histogram is really interesting. Sub-Saharan African countries are overwhelmingly grouped in the 90-100 range for this goal, while OECD countries have more middle-range scores. OECD countries are performing below Sub-Saharan African countries in terms of addressing climate change, which could be explained by a variety of factors. 

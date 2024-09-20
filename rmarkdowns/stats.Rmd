@@ -220,3 +220,19 @@ ggplot(sdr_data, aes(x = goal_12_score,
       - are there any points that don't follow the trend (outliers)
         
         - which country(s) are outliers?
+        
+```{r}
+library(plotly)
+```
+```{r}
+goal_7_3_scatter <- ggplot(sdr_data, aes(x = goal_7_score, 
+                     y = goal_3_score, label = country)) +
+  geom_point() +
+  geom_smooth() +
+  stat_cor() +
+  theme_minimal() 
+
+ggplotly(goal_7_3_scatter)
+```
+
+Interpretation: There is a strong positive correlation between goal 7 scores and goal 3 scores. As access to affordable and clean energy increases (goal 7) increases, so does good health and well-being (goal 3). This indicates that affordable and clean energy is vital for the health and well being of a population. Luxembourg (goal 7 score = 56.5, goal 3 score= 96.5) remains an outlier, as health and well-being is rated very high, even though access to affordable and clean energy is scored in the mid-range. This is perhaps a feature of Luxembourg's small population size and small geography relative to its carbon-heavy energy market, or perhaps there are other strong cultural nuances at play that influence well-being. 

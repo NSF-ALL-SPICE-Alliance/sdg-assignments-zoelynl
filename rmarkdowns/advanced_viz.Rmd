@@ -154,7 +154,7 @@ goal_3_4_scatter <-ggplot(data = sdr_data, aes(x= goal_3_score, y = goal_4_score
   labs(title = "Relationship Between SDG 3 and SDG 4 Scores",
        x = "SDG 3 Score",
        y = "SDG 4 Score",
-       fill = "Region")
+       color = "Region")
 
 ggplotly(goal_3_4_scatter)
 ```

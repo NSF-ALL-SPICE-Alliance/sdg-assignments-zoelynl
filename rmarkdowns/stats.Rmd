@@ -229,7 +229,7 @@ goal_7_3_scatter <- ggplot(sdr_data, aes(x = goal_7_score,
                      y = goal_3_score, label = country)) +
   geom_point() +
   geom_smooth() +
-  stat_cor() +
+  stat_cor(output.type = "text", label.sep = '\n') +
   theme_minimal() 
 
 ggplotly(goal_7_3_scatter)

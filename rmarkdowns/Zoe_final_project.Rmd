@@ -1,0 +1,155 @@
+---
+title: "Final Project"
+author: "Zoe Lewis"
+date: "2024-10-16"
+output: html_document
+---
+
+# SDG Performance and Progress on Gender Equality in Japan
+
+**Intro:** Japan is an advanced island nation in East Asia, and is the world's third-largest economy (GDP ranking for 2024). Japan is famous for innovations in electronics, robotics, and the automotive industry, and is recognized worldwide as a leading exporter of fashion and entertainment. Japan is a member of the Organization for Economic Cooperation and Development (OECD), an international coalition of 38 democracies committed to shared policy standards for sustainable growth. As an OECD member country, Japan has made progress toward achieving the Sustainable Development Goals (SDGs), though systemic social and environmental issues continue to present significant barriers. In the SDG rankings, Japan holds position 21 (out of 166 countries, 2023 data), though among the rankings for the 38 OECD countries only, Japan holds position 20. This significant difference highlights that, while a leader in the world rankings, challenges unique to Japan's culture explain the country's moderate performance among OECD members.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) # most popular R package
+library(here) # cuts out long file paths when reading in data (makes reproducible)
+library(janitor) # cleans column names
+library(vembedr) 
+library(plotly)
+library(viridis)
+library(ggpubr)
+library(ggcorrplot)
+library(factoextra) # visualizes clusters
+library(pdp)
+```
+
+```{r, message=FALSE}
+sdr_data <- read_csv(here("data/SDR-2023-Data.csv"))
+```
+
+```{r, message=FALSE}
+sdr_data <- sdr_data %>% 
+  clean_names()
+```
+
+```{r, message=FALSE}
+sdr_data_japan <- sdr_data %>%
+  filter(country == "Japan") %>%
+  select(goal_1_score:goal_17_score)
+```
+
+```{r, message=FALSE}
+sdr_data_japan_longer <- sdr_data_japan %>%
+  pivot_longer(cols = goal_1_score:goal_17_score,
+               names_to = "goal",
+               values_to = "score")
+```
+
+```{r, message=FALSE}
+japan_sdg_scores_histogram <- ggplot(data = sdr_data_japan_longer, aes(x = score, y = reorder(goal, score))) +
+  geom_bar(stat = "identity", fill = "#69b3a2", color = "purple") +
+  theme_minimal() +
+  labs(title = "Japan SDG Scores",
+       x = "Score",
+       y= "") +
+  scale_fill_brewer(palette = "Set3")
+
+ggplotly(japan_sdg_scores_histogram)
+```
+
+**Japan SDG Scores:** 
+Japan's performance on the 17 SDGs (2023 report) is shown above in ranked order, with the highest performing goal shown at the top. Japan's performance on SDG 1 (No Poverty) ranks the highest at 99.3, and many features of the economy in Japan can explain this outcome. Japan has social safety nets, including a robust pension system and unemployment insurance, economic policies aimed at stabilizing the economy, a strong universal healthcare system, and low levels of income inequality. Japan's performance in SDG 3 and SDG 9 ranks second and third, respectively. SDG 3 (Good Health and Well-Being) encompasses a long and varied list of indicators, and Japan's high performance on this particularly complex SDG can be understood as a result of Japan's universal healthcare system and a strong public emphasis on preventative care. Japan's traffic deaths per 100,000 residents, one particularly interesting indicator included in SDG 3, are very low at 3.60, and this can be explained by Japan's robust public transportation system. This performance can be compared to the United States, where traffic deaths are measured at 12.67 per 100,000 residents. Japan's high performance on SDG 9 (Industry, Innovation, and Infrastructure) can be understood in the context of Japan's significant investment in technological advancement, research and development, and sustainable infrastructure.
+
+At the other end of the spectrum, Japan's performance on SDG 15, SDG 5, and SDG 14 rank the lowest. SDG 15 (Life On Land) and SDG 14 (Life Below Water) are both connected to stewardship of natural resources, indicating that Japan has significant opportunities to improve environmental policies and practices. Japan's poor performance on SDG 5 (Gender Equality) is an interesting outlier among other OECD countries, and Japan in fact ranks the second lowest on SDG 5 of all OECD countries. 
+
+```{r, message=FALSE}
+oecd_sdr_data <- sdr_data %>% 
+  filter(regions_used_for_the_sdr == "OECD")
+```
+
+```{r, message=FALSE}
+goal_1_3_histogram <- ggplot(data = oecd_sdr_data, aes(x= goal_1_score, y = goal_3_score, color = country)) +
+  geom_point() +
+    theme_minimal() +
+  scale_color_viridis_d(option = "turbo") +
+  labs(title = "Relationship Between SDG 1 and SDG 3 for OECD Countries",
+       x = "SDG 1 Score",
+       y = "SDG 3 Score",
+       color = "Country")
+
+ggplotly(goal_1_3_histogram)
+```
+
+**SDG 1 and SDG 3 Explored for OECD Countries**:
+Scores for SDG 1 and SDG 3, Japan's highest performing indicators, for all OECD member countries are shown above in a scatter plot. A significant cluster is observed in the top right quadrant of the scatter plot. For SDG 1 (No Poverty), all but 3 OECD member countries show scores between 95-100. For SDG 3 (Good Health and Well-Being) the score range is only slightly more broad, with the majority of OECD member countries showing scores over 85. It should be noted that the score range for both the x and y axis on this scatter plot is between 80-100, indicating that all OECD member countries perform exceedingly well on these two SDGs. Japan's performance on SDG 1 and SDG 3 is therefore understood as normal, or rather, not so exceptional, among OECD countries.
+
+```{r, message=FALSE}
+goal_5_15_histogram <- ggplot(data = oecd_sdr_data, aes(x= goal_5_score, y = goal_15_score, color = country)) +
+  geom_point() +
+    theme_minimal() +
+  scale_color_viridis_d(option = "turbo") +
+  labs(title = "Relationship Between SDG 5 and SDG 15 for OECD Countries",
+       x = "SDG 5 Score",
+       y = "SDG 15 Score",
+       color = "Country")
+
+ggplotly(goal_5_15_histogram)
+```
+
+**SDG 5 and SDG 15 Explored for OECD Countries**:
+Scores for SDG 5 and SDG 15, Japan's second and third lowest performing indicators, for all OECD member countries are shown above in a scatter plot. A loose cluster is observed in the top right quadrant, with a secondary cluster in the bottom right quadrant, indicating that the majority of OECD countries have scores over 70 for both SDGs. The clusters, however, are less pronounced in this scatter plot compared to the plot above for SDG 1 and SDG 3, indicating a wider variance in performance. SDG 15 (Life on Land) presents significant challenges for countries worldwide, with OECD member countries showing scores as low as 50-60. Japan's performance on SDG 5 (Gender Equality) is a notable point of interest. Japan's performance on Gender Equality is second lowest among OECD members at 61.7, above only Turkey at 47.6. This begs the question: how can a country with low income inequality, universal healthcare access, and robust educational systems perform so poorly on gender equality?
+
+```{r, message=FALSE}
+oecd_sdr_scores <- oecd_sdr_data %>%
+  select(
+    goal_1_score, goal_2_score, goal_3_score, goal_4_score, goal_5_score,
+    goal_6_score, goal_7_score, goal_8_score, goal_9_score, goal_10_score,
+    goal_11_score, goal_12_score, goal_13_score, goal_14_score, goal_15_score,
+    goal_16_score, goal_17_score
+  )
+
+oecd_sdr_scores_matrix <- as.matrix(oecd_sdr_scores)
+
+cor <- cor(oecd_sdr_scores_matrix, use = "complete.obs")
+
+ggcorrplot(cor, method = "circle", type = "lower", lab = TRUE, lab_size = 2) +
+  theme(axis.text.y = element_text(size = 8),
+  axis.text.x = element_text(size = 8))
+
+```
+**Investigating Correlation Between SDGs for OECD Members:**
+Are there other SDGs which might influence performance on SDG 5 (Gender Equality)? The above graph plots the correlation coefficient between all 17 SDGs for OECD member countries. A somewhat strong correlation is indicated between SDG 5 and SDG 4 (Quality Education). A slightly stronger correlation is indicated between SDG 5 and SDG 11 (Sustainable Cities and Communities). 
+
+```{r, message=FALSE, warning=FALSE}
+goal_4_5_scatter <- ggplot(oecd_sdr_data, aes(x = goal_4_score, 
+                     y = goal_5_score, label = country)) +
+  geom_point() +
+  geom_smooth() +
+  stat_cor(output.type = "text", label.sep = '\n') +
+  theme_minimal() 
+
+ggplotly(goal_4_5_scatter)
+```
+
+**Correlation Between SDG 4 and SDG 5:**
+The linear regression model above examines the relationship between SDG 4 (Quality Education) and SDG 5 (Gender Equality). Among OECD member countries, the model indicates that higher SDG 4 scores are correlated with higher SDG 5 scores. This suggests that higher quality education leads to greater gender equality. It is noteworthy that the SDG 4 scores of all but three OECD countries fall in the 90-100 range, with the majority falling in the 95-100 range. This indicates that high quality education is a significant feature of all OECD countries. Japan's SDG 4 score of 93.9 suggests that a further improvement in quality education could move the needle on gender equality. 
+
+```{r, message=FALSE, warning=FALSE}
+goal_11_5_scatter <- ggplot(oecd_sdr_data, aes(x = goal_11_score, 
+                     y = goal_5_score, label = country)) +
+  geom_point() +
+  geom_smooth() +
+  stat_cor(output.type = "text", label.sep = '\n') +
+  theme_minimal() 
+
+ggplotly(goal_11_5_scatter)
+```
+
+**Correlation Between SDG 11 and SDG 5:**
+The linear regression model above examines the relationship between SDG 11 (Sustainable Cities and Communities) and SDG 5 (Gender Equality). Among OECD member countries, the model indicates that higher SDG 11 scores are correlated with higher SDG 5 scores. This suggests that sustainable communities support higher levels of gender equality. While a link between education and gender equality may seem more obvious, the role of sustainable cities in greater gender equality is more complex. The UN states that "Goal 11 is about making cities and human settlements inclusive, safe, resilient, and sustainable", with a focus on sustainable urban growth and energy consumption (<a href="https://www.un.org/sustainabledevelopment/cities/">source</a>). It is suggested, perhaps, that greater gender equality can be achieved in cities that include safe and inclusive urban spaces, greater access to services, and better disaster resilience. To the latter point, Japan is positioned along the Pacific Ring of Fire and is one of the most natural disaster prone regions in the world, facing significant threats from earthquakes, tsunamis, typhoons, volcanic activity, and flooding. Is this threat, along with the complexity of achieving sustainable growth in Japan's large urban centers, significant enough to prevent progress on gender equality?
+
+**Conclusion:**
+Japan's SDG performance is ranked highly on the world stage, with particularly strong showings in innovation, infrastructure, healthcare, and education. And yet, Japan performs very poorly among other developed nations with regards to gender equality. While factors such as quality education and sustainable urban development may play a factor in Japan's ability to achieve greater gender equality, perhaps the most significant barriers to progress in Japan are cultural norms which perpetuate gender inequality. These norms include held beliefs about traditional gender roles, rigid corporate structures and long working hours which make childrearing difficult, and a political environment dominated by men. 
+
+On a broader scale, further questions arise about the ability of the SDG program to drive true progress in countries where dominant cultural norms perpetuate gender inequality. While a relationship may exist between gender equality and goals such as SDG 11 and SDG 4, Japan may present as a bellwether that the SDG standards are not comprehensive enough to drive real change on gender equality. Indeed, the World Economic Forum in 2023 declared that "Lack of progress on gender equality threatens the entire SDG Agenda" (<a href="https://www.weforum.org/agenda/2023/09/gender-equality-progress-sustainable-development-goals/">source</a>).
+
